@@ -24,24 +24,46 @@
     <script src="/fonts/fontawesome/fontawesome.min.js"></script>
     <script src="/fonts/fontawesome/solid.min.js"></script>
 	<script src="/fonts/fontawesome/regular.min.js"></script>
+
 </head>
 <body>
 
     <div class="container">
+		<noscript>
+			<h4 class="pt-3">
+				TimeClicker requires JavaScript for its core functionality. Please enable JavaScript to load the website.
+				<br><a href="https://www.enable-javascript.com/" target="_blank">Click here for instructions on how to enable JavaScript.</a>
+			</h4>
+			<style>
+				.col-lg-12 {
+					display:none;
+				}
+			</style>
+		</noscript>
         <div class="col-lg-12 pt-3">
 			<div id="header">
 				<h1 class="mt-3 event-title">Loading...</h1>
 				<p class="text-muted"><span class="event-length"></span> &#x2022; <span class="event-time"></span> &#x2022; <span class="event-location"></span></p>
-
+				<p id="user-tray" class="hidden">Logged in as <i class="username"></i>(<a class="link" id="logout">Logout</a>)</p>
+				<hr>
 			</div>
-			<div id="login">
+
+			<div id="loading">
+				<div class="spinner">
+					<div class="bounce1"></div>
+					<div class="bounce2"></div>
+					<div class="bounce3"></div>
+				</div>
+			</div>
+			<div id="login" class="hidden">
 				<p>You have been invited to help select a time for this event. </p>
 				<h4>Please enter your name to begin:</h4>
 				<input type="text" placeholder="John Smith" class="form-control" id="name">
+				<p class="text-danger">Invalid Username. Usernames may only contain letters, numbers, spaces, dashes, and underscores.</p>
 				<button class="btn btn-primary btn-block mt-3" id="name-submit">Submit</button>
 			</div>
             <div class="hidden" id="main">
-               <p>Current best time: Fridays, 6pm - 9pm based on three yes votes and one maybe vote.</p>
+               <p id="best">Current best time: Fridays, 6pm - 9pm based on three yes votes and one maybe vote.</p>
 				<hr>
                 <div id="scheduler">
                     <p class="text-muted"> Enter your availability for each time below:</p>
@@ -146,11 +168,50 @@
 				$(".event-title").text(data.name);
 			});
 
+
+
+
+		$("#name").keyup(function(e) {
+			if (e.which === 13) {
+				$("#name-submit").click();
+			}
+		});
+
+
+
 		$("#name-submit").click(function() {
+			$("#invalid-username").addClass("hidden");
 			var username = $("#name").val();
 
+			$("#name").val("");
+
+			if (!(/[a-zA-Z0-9\-_ ]+/g, "".test(username))) {
+				$("#invalid-username").removeClass("hidden");
+				return;
+			}
+
+			localStorage.setItem("timeClickerUsername", username);
+
 			$("#login").addClass("hidden");
-			$("#main").removeClass("hidden");
+			$("#loading").removeClass("hidden");
+
+			init(username);
+		});
+
+
+		(function() {
+			if (localStorage.getItem("timeClickerUsername")) {
+
+				init(localStorage.getItem("timeClickerUsername"));
+			} else {
+				$("#loading").addClass("hidden");
+				$("#login").removeClass("hidden");
+			}
+		})();
+
+
+		function init(username) {
+			$(".username").text(username);
 
 			let buttons = ["decline", "maybe", "accept"];
 			let contextMap = ["danger", "warning", "success"];
@@ -175,13 +236,24 @@
 				el.addClass("hidden").siblings( ".expand-" + (isShow ? "content" : "show")).removeClass("hidden");
 			});
 
+			$("#add-time").keyup(function(e) {
+				if (e.which === 13) {
+					$("#add-btn").click();
+				}
+			});
+
 			$("#add-btn").click(function() {
+
+				if ($("#add-time").val().replace(/[ \t]+/g, "").length === 0) {
+					return;
+				}
 
 				db
 					.collection("events").doc(id)
 					.collection("options").add({
 					name:$("#add-time").val()
 				})
+				$("#add-time").val("");
 
 			});
 
@@ -216,16 +288,24 @@
 								continue;
 							}
 							console.log(vote.data());
-							votes[vote.data().vote].push(`<span title="${vote.data().timestamp.toDate() + ""}"><i>${vote.data().name}</i></span>`);
+							votes[vote.data().vote].push(`<span title="${vote.data().timestamp.toDate() + ""}"><i>${encodeURIComponent(vote.data().name)}</i></span>`);
 						}
 						console.log(votes);
 						if (currentUser) {
 							votes[currentUserVote].unshift(currentUser);
 						}
 
-						$("#opt-" + doc.id).remove();
-						$("#opts-table").prepend(getTableRowHTML(doc.id, doc.data().name, votes, context));
+
+						if ($("#opt-" + doc.id).length) {
+							$("#opt-" + doc.id).html(getTableRowHTML(doc.id, doc.data().name, votes, context)[1]);
+						} else {
+							$("#opts-table").prepend(getTableRowHTML(doc.id, doc.data().name, votes, context).join(""));
+						}
+
 						console.log(getTableRowHTML(doc.id, doc.data().name, votes));
+
+
+
 					});
 
 				}
@@ -236,15 +316,29 @@
 				db
 					.collection("events").doc(id)
 					.collection("options").doc(optionId)
-					.collection("votes").doc(username.replaceAll(" ", "").toLowerCase())
-					.set({
+					.collection("votes").add({
 						vote:selected,
 						timestamp:new Date(),
 						name:username
 					});
 			}
-		});
 
+
+
+
+			$("#loading").addClass("hidden");
+			$("#user-tray").removeClass("hidden");
+			$("#main").removeClass("hidden");
+
+			$("#logout").click(function() {
+
+				localStorage.removeItem("timeClickerUsername");
+				window.location.reload();
+			});
+
+
+
+		}
     </script>
 	<script>
 
@@ -254,7 +348,7 @@
 			return (yes + (maybe * 0.5) - no)/(yes + maybe + no);
 		}
 		function getShortString(people, type) {
-			console.log(people)
+			console.log(people);
 			if (people.length > 3) {
 				return `
 					${people.slice(0,2).join(", ")},
@@ -279,8 +373,8 @@
 		}
 		function getTableRowHTML(id, time, votes, context) {
 			console.log(votes);
-			return `
-						<tr id="opt-${id}" class="opt ${context? "table-" + context : ""}">
+			return [`<tr id="opt-${id}" class="opt ${context? "table-" + context : ""}">`,
+						`
 							<td class="col-md-8 col-lg-9">
 								<b>${time}</b> <br>
 								${["No", "Maybe", "Yes"].map((el, i) => getShortString(votes[i], el)).filter(el => el !== "").join(" | ")}
@@ -301,7 +395,7 @@
 									</label>
 								</div>
 							</td>
-						</tr>`;
+						`, `</tr>`];
 		}
 
 
