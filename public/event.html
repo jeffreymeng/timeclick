@@ -1,42 +1,316 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-132391027-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-132391027-1');
+    </script>
+
+
     <meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="author" content="Jeffrey Meng">
+
     <title>TimeClicker</title>
     <link href="/css/bootstrap.css" rel="stylesheet" type="text/css">
     <link href="/css/main.css" rel="stylesheet" type="text/css">
-
+    <script src="/fonts/fontawesome/fontawesome.min.js"></script>
+    <script src="/fonts/fontawesome/solid.min.js"></script>
+	<script src="/fonts/fontawesome/regular.min.js"></script>
 </head>
 <body>
 
     <div class="container">
-        <div class="col-lg-12">
-            <div class="text-center pt-3">
-                <p>Jeffrey Meng has invited you to help schedule</p>
-                <h1 class="mt-3">Board Games</h1>
-                <hr>
-                <p class="text-muted">3-5 Hours &#x2022; Weekly on Fri. Sat. or Sun. &#x2022; Rotating Locations</p>
+        <div class="col-lg-12 pt-3">
+			<div id="header">
+				<h1 class="mt-3 event-title">Loading...</h1>
+				<p class="text-muted"><span class="event-length"></span> &#x2022; <span class="event-time"></span> &#x2022; <span class="event-location"></span></p>
+
+			</div>
+			<div id="login">
+				<p>You have been invited to help select a time for this event. </p>
+				<h4>Please enter your name to begin:</h4>
+				<input type="text" placeholder="John Smith" class="form-control" id="name">
+				<button class="btn btn-primary btn-block mt-3" id="name-submit">Submit</button>
+			</div>
+            <div class="hidden" id="main">
+               <p>Current best time: Fridays, 6pm - 9pm based on three yes votes and one maybe vote.</p>
+				<hr>
                 <div id="scheduler">
-                    Manually input times below, or Connect to Google Calendar
+                    <p class="text-muted"> Enter your availability for each time below:</p>
+                    <table class="table" id="opts-table">
+
+                        <!--<tr id="opt-dAY4XtRH8dszPMNVddTg">-->
+                            <!--<td class="col-md-8 col-lg-9">-->
+								<!--<b>Fridays, 6pm - 9pm</b> <br>-->
+								<!--You, Joe,-->
+								<!--<span class="expand-box"><span class="expand-content hidden">John, and Bob (<a class="expand-hide link" title="hide"><i class="far fa-times"></i></a>)</span><a title="John, Bob" class="expand-show link"> and-->
+									<!--2 others</a></span> said maybe, Bob said no-->
+							<!--</td>-->
+                            <!--<td class="col-md-4 col-lg-3">-->
+                                <!--<div class="btn-group btn-group-toggle" data-toggle="buttons">-->
+                                    <!--<label class="btn btn-secondary" title="Not Available">-->
+                                        <!--<input type="radio" name="decline" class="decline" autocomplete="off">-->
+                                        <!--<i class="fas fa-times"></i>-->
+                                    <!--</label>-->
+                                    <!--<label class="btn btn-secondary" title="Maybe / Available as last resort" >-->
+                                        <!--<input type="radio" name="maybe" class="maybe" autocomplete="off">-->
+                                        <!--<i class="fas fa-question"></i>-->
+                                    <!--</label>-->
+                                    <!--<label class="btn btn-secondary" title="Available">-->
+                                        <!--<input type="radio" name="accept" class="accept" autocomplete="off">-->
+                                        <!--<i class="fas fa-check"></i>-->
+                                    <!--</label>-->
+                                <!--</div>-->
+                            <!--</td>-->
+                        <!--</tr>-->
+                        <tr>
+                            <td scope="col col-xd-9" colspan="2">
+
+								<div class="input-group mb-3">
+									<div class="input-group-prepend">
+										<span class="input-group-text">Add Time:</span>
+									</div>
+									<input type="text" class="form-control" placeholder="Saturdays, 4pm - 9pm" id="add-time">
+									<div class="input-group-append">
+										<button class="btn btn-outline-primary" type="button" id="add-btn">Add</button>
+									</div>
+								</div>
+
+							</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
-
-
-
-
         </div>
     </div>
 
     <div class="footer">
         <div class="footer-content text-center">
-            Copyright &copy; 2018-2019 Jeffrey Meng<br>
-            <a href="/privacy/">Privacy policy</a> | <a href="mailto:timeclick@jeffkmeng.com">Contact Us</a>
+            Copyright &copy; 2018-2019 TimeClicker<br>
+            <a href="/privacy/">Privacy policy</a> | <a href="mailto:timeclicker@jeffkmeng.com">Contact Us</a>
         </div>
     </div>
 
-<script src="/js/jquery.min.js"></script>
-<script src="/js/popper.min.js"></script>
-<script src="/js/bootstrap.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.5.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.5.5/firebase-firestore.js"></script>
+	<script>
+		// Initialize Firebase
+		var config = {
+			apiKey: "AIzaSyD-jm9FsZmKD_QN7ppuosVXSDwfdX6xBLk",
+			authDomain: "timeclicker-fd7f6.firebaseapp.com",
+			databaseURL: "https://timeclicker-fd7f6.firebaseio.com",
+			projectId: "timeclicker-fd7f6",
+			storageBucket: "timeclicker-fd7f6.appspot.com",
+			messagingSenderId: "819928530776"
+		};
+		firebase.initializeApp(config);
+	</script>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/popper.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script>
 
+
+		const db = firebase.firestore();
+		let id = "test";
+
+		db.settings({
+			timestampsInSnapshots: true
+		});
+
+		db.collection("events").doc(id)
+			.onSnapshot(function(doc) {
+				const data = doc.data();
+				console.log(doc.data());
+				console.log(data.time.possibleDays);
+				const dateOptsStrings = data.time.possibleDays.map(el => {
+					return ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][el]
+				});
+				const shortDateOptsStrings = dateOptsStrings.map(el => {
+					return el.substring(0,3) + ".";
+				});
+
+				$(".event-length").text(data.length.min + "-" + data.length.max + " " + data.length.unit);
+				$(".event-time").text(data.time.type + "ly on " + shortDateOptsStrings
+					.slice(0,shortDateOptsStrings.length - 1)
+					.join(", ") + ", and " + shortDateOptsStrings[shortDateOptsStrings.length - 1]);
+				$(".event-location").text(data.location);
+				$(".event-title").text(data.name);
+			});
+
+		$("#name-submit").click(function() {
+			var username = $("#name").val();
+
+			$("#login").addClass("hidden");
+			$("#main").removeClass("hidden");
+
+			let buttons = ["decline", "maybe", "accept"];
+			let contextMap = ["danger", "warning", "success"];
+			$(document).on("change", buttons.map(el => "." + el).join(", "), function() {
+				let btn = $(this).attr("name");
+				let i = buttons.indexOf(btn);
+				let row = $(this).parent().parent().parent().parent();
+				row
+					.removeClass("table-" + contextMap[i + 1 >= contextMap.length ? i + 1 - contextMap.length : i + 1])
+					.removeClass("table-" + contextMap[i + 2 >= contextMap.length ? i + 2 - contextMap.length : i + 2])
+					.addClass("table-" + contextMap[i]);
+				onVote(row.attr("id").substring(4), buttons.indexOf(btn));
+			});
+
+			$(document).on("click", ".expand-show, .expand-hide", function() {
+				let isShow = $(this).hasClass("expand-show");
+
+				let el = $(this);
+				if (!isShow) {
+					el = el.parent();
+				}
+				el.addClass("hidden").siblings( ".expand-" + (isShow ? "content" : "show")).removeClass("hidden");
+			});
+
+			$("#add-btn").click(function() {
+
+				db
+					.collection("events").doc(id)
+					.collection("options").add({
+					name:$("#add-time").val()
+				})
+
+			});
+
+
+
+
+
+			db
+				.collection("events").doc(id)
+				.collection("options").onSnapshot(function(collection) {
+				console.log(collection);
+				let docs = collection.docs;
+				for (let doc of docs) {
+					console.log(doc);
+					db
+						.collection("events").doc(id)
+						.collection("options").doc(doc.id)
+						.collection("votes").onSnapshot(function(voteCollection) {
+						let votes = Array(3).fill(undefined).map(() => Array(0));
+						let context = false;
+						console.log(votes);
+						console.log(doc);
+						console.log(doc.data());
+						let currentUser = false;
+						let currentUserVote = -1;
+						for (let vote of voteCollection.docs) {
+
+							if (vote.data().name === username) {
+								currentUserVote = vote.data().vote;
+								currentUser = `<span title="${vote.data().timestamp.toDate() + ""}">You</span>`;
+								context = contextMap[vote.data().vote];
+								continue;
+							}
+							console.log(vote.data());
+							votes[vote.data().vote].push(`<span title="${vote.data().timestamp.toDate() + ""}"><i>${vote.data().name}</i></span>`);
+						}
+						console.log(votes);
+						if (currentUser) {
+							votes[currentUserVote].unshift(currentUser);
+						}
+
+						$("#opt-" + doc.id).remove();
+						$("#opts-table").prepend(getTableRowHTML(doc.id, doc.data().name, votes, context));
+						console.log(getTableRowHTML(doc.id, doc.data().name, votes));
+					});
+
+				}
+
+
+			});
+			function onVote(optionId, selected) {
+				db
+					.collection("events").doc(id)
+					.collection("options").doc(optionId)
+					.collection("votes").doc(username.replaceAll(" ", "").toLowerCase())
+					.set({
+						vote:selected,
+						timestamp:new Date(),
+						name:username
+					});
+			}
+		});
+
+    </script>
+	<script>
+
+
+
+		function getWeight(yes, maybe, no) {
+			return (yes + (maybe * 0.5) - no)/(yes + maybe + no);
+		}
+		function getShortString(people, type) {
+			console.log(people)
+			if (people.length > 3) {
+				return `
+					${people.slice(0,2).join(", ")},
+					<span class="expand-box">
+						<span class="expand-content hidden">
+							${people.slice(2, people.length - 1).join(", ")}, and ${people[people.length - 1]} (<a class="expand-hide link" title="hide"><i class="far fa-times"></i></a>)
+						</span>
+						<a class="expand-show link">
+							and ${people.length - 2} others
+						</a>
+					</span> said ${type}`;
+			} else if (people.length === 3) {
+				return people.slice(0, people.length - 1).join(", ") + ", and " + people[people.length - 1] + " said " + type;
+			} else if (people.length === 2) {
+				return people[0] + " and " + people[1] + " said " + type;
+			} else if (people.length === 1) {
+				return people[0] + " said " + type;
+			} else {
+				return "";
+
+			}
+		}
+		function getTableRowHTML(id, time, votes, context) {
+			console.log(votes);
+			return `
+						<tr id="opt-${id}" class="opt ${context? "table-" + context : ""}">
+							<td class="col-md-8 col-lg-9">
+								<b>${time}</b> <br>
+								${["No", "Maybe", "Yes"].map((el, i) => getShortString(votes[i], el)).filter(el => el !== "").join(" | ")}
+							</td>
+							<td class="col-md-4 col-lg-3">
+								<div class="btn-group btn-group-toggle" data-toggle="buttons">
+									<label class="btn btn-secondary ${context == "danger" ? "active" : ""}" title="Not Available">
+										<input type="radio" name="decline" class="decline" autocomplete="off" ${context == "danger" ? "active" : ""}>
+										<i class="fas fa-times"></i>
+									</label>
+									<label class="btn btn-secondary ${context == "warning" ? "active" : ""}" title="Maybe / Available as last resort" >
+										<input type="radio" name="maybe" class="maybe" autocomplete="off" ${context == "warning" ? "active" : ""}>
+										<i class="fas fa-question"></i>
+									</label>
+									<label class="btn btn-secondary ${context == "success" ? "active" : ""}" title="Available">
+										<input type="radio" name="accept" class="accept" autocomplete="off" ${context == "success" ? "active" : ""}>
+										<i class="fas fa-check"></i>
+									</label>
+								</div>
+							</td>
+						</tr>`;
+		}
+
+
+
+		//http://stackoverflow.com/a/17606289/5511561s
+		String.prototype.replaceAll = function(search, replacement) {
+			var target = this;
+			return target.replace(new RegExp(search, 'g'), replacement);
+		};
+	</script>
 </body>
 </html>

@@ -35,3 +35,18 @@ body {
     /* height + top/bottom paddding + top/bottom border must add up to footer height */
     padding: 15px;
 }
+
+.hidden {
+    display:none !important;
+}
+
+a.link {
+	color: #007bff !important;
+	text-decoration: none !important;
+	background-color: transparent !important;
+}
+
+a.link:hover {
+	color: #0056b3 !important;
+	text-decoration: underline !important;
+}
