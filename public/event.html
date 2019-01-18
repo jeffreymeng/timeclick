@@ -151,8 +151,7 @@
 		db.collection("events").doc(id)
 			.onSnapshot(function(doc) {
 				const data = doc.data();
-				console.log(doc.data());
-				console.log(data.time.possibleDays);
+
 				const dateOptsStrings = data.time.possibleDays.map(el => {
 					return ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][el]
 				});
@@ -264,19 +263,15 @@
 			db
 				.collection("events").doc(id)
 				.collection("options").onSnapshot(function(collection) {
-				console.log(collection);
 				let docs = collection.docs;
 				for (let doc of docs) {
-					console.log(doc);
 					db
 						.collection("events").doc(id)
 						.collection("options").doc(doc.id)
 						.collection("votes").onSnapshot(function(voteCollection) {
 						let votes = Array(3).fill(undefined).map(() => Array(0));
 						let context = false;
-						console.log(votes);
-						console.log(doc);
-						console.log(doc.data());
+
 						let currentUser = false;
 						let currentUserVote = -1;
 						for (let vote of voteCollection.docs) {
@@ -287,10 +282,8 @@
 								context = contextMap[vote.data().vote];
 								continue;
 							}
-							console.log(vote.data());
 							votes[vote.data().vote].push(`<span title="${vote.data().timestamp.toDate() + ""}"><i>${encodeURIComponent(vote.data().name)}</i></span>`);
 						}
-						console.log(votes);
 						if (currentUser) {
 							votes[currentUserVote].unshift(currentUser);
 						}
@@ -302,7 +295,6 @@
 							$("#opts-table").prepend(getTableRowHTML(doc.id, doc.data().name, votes, context).join(""));
 						}
 
-						console.log(getTableRowHTML(doc.id, doc.data().name, votes));
 
 
 
@@ -348,7 +340,6 @@
 			return (yes + (maybe * 0.5) - no)/(yes + maybe + no);
 		}
 		function getShortString(people, type) {
-			console.log(people);
 			if (people.length > 3) {
 				return `
 					${people.slice(0,2).join(", ")},
@@ -372,7 +363,6 @@
 			}
 		}
 		function getTableRowHTML(id, time, votes, context) {
-			console.log(votes);
 			return [`<tr id="opt-${id}" class="opt ${context? "table-" + context : ""}">`,
 						`
 							<td class="col-md-8 col-lg-9">
